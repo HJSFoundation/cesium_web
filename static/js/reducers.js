@@ -171,6 +171,25 @@ function misc(state={ logoSpinAngle: 0 }, action) {
   }
 }
 
+function plots(state=[], action){
+  console.log("Action " + action);
+  switch (action.type) {
+    case Action.ADD_TAG_MULTISELECT:
+      console.log("INSIDE THE REDUCER");
+      console.log(state);
+      var state_copy = Object.assign([], state);
+      var plot_idx = state_copy.findIndex(plot => (plot.featuresetId === action.featuresetId));
+      if (plot_idx >= 0) {
+        state_copy[plot_idx]['features'] = action.tag;
+        return state_copy;
+      } else {
+        return [ ...state, {featuresetId: action.featuresetId, features: [action.tag]} ];
+      }
+   default:
+     return state;
+  };
+}
+
 
 const rootReducer = combineReducers({
   projects,
@@ -183,6 +202,7 @@ const rootReducer = combineReducers({
   expander,
   sklearnModels,
   profile,
+  plots,
   form: myFormReducer(formReducer),
   misc
 });

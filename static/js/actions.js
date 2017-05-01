@@ -50,6 +50,8 @@ export const FETCH_USER_PROFILE = 'cesium/FETCH_USER_PROFILE';
 export const RECEIVE_USER_PROFILE = 'cesium/FETCH_USER_PROFILE';
 
 import { showNotification, reduceNotifications } from 'baselayer/components/Notifications';
+export const GENERATE_PLOT = 'cesium/GENERATE_PLOT';
+export const ADD_TAG_MULTISELECT = 'cesium/ADD_TAG_MULTISELECT';
 import promiseAction from './action_tools';
 import { objectType } from './utils';
 
@@ -100,6 +102,8 @@ export function fetchProjects() {
 
 // Add a new project
 export function addProject(form) {
+  console.log("LOGGING EXAMPLE FORM");
+  console.log(form);
   return dispatch =>
     promiseAction(
       dispatch,
@@ -713,5 +717,39 @@ export function hydrate() {
         });
       });
     dispatch(fetchSklearnModels());
+  };
+}
+
+export function generatePlot(form) {
+  console.log("In the action function generatePlot");
+  console.log(form);
+  return dispatch =>
+    promiseAction(
+      dispatch,
+      GENERATE_PLOT,
+
+      fetch('/plot_features',
+            { method: 'POST',
+             body: JSON.stringify(form),
+             headers: new Headers({
+               'Content-Type': 'application/json'
+             }) }
+      ).then(response => response.json()
+      ).then((json) => {
+        if (json.status == 'success') {
+          console.log("Got response from server with plot data.")
+        } else {
+          return Promise.reject({ _error: json.message });
+        }
+        return json;
+      })
+    );
+}
+
+export function addTagToList(tag, featuresetId) {
+  return {
+    type: ADD_TAG_MULTISELECT,
+    tag: tag,
+    featuresetId: featuresetId
   };
 }
