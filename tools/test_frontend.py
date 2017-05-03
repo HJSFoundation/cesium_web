@@ -15,7 +15,7 @@ try:
 except ImportError:
     import httplib as http
 
-from cesium_app.model_util import clear_tables
+from baselayer.app.model_util import clear_tables
 
 TEST_CONFIG = '_cesium_test.yaml'
 
