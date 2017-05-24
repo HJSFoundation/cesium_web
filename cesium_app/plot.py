@@ -42,7 +42,7 @@ def feature_scatterplot(fset_path, features_to_plot):
         p.outline_line_color = None
         p.axis.visible = None
 
-    plot = gridplot(plots.tolist(), ncol=len(features_to_plot), mergetools=True, responsive=True, title="Test")
+    plot = gridplot(plots.tolist(), ncol=len(features_to_plot), mergetools=True, responsive=True, title="Test", toolbar_location="below")
 
     # Convert plot to json objects necessary for rendering with bokeh on the
     # frontend
