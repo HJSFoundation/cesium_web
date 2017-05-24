@@ -222,8 +222,9 @@ export let FeatureTable = props => (
           const foldedContent = done && (
             <tr key={`plot${featureset.id}`}>
               <td colSpan={4}>
-                <PlotForm url={`${props.featuresURL}/${featureset.id}`} featuresetId={featureset.id}/>
-                {/*<Plot url={`${props.featurePlotURL}/${featureset.id}`} />*/}
+                {/* TODO Change featuresetID to it's own parameter? */}
+                <PlotForm formKey={featureset.id.toString()} initialValues={{ tags: [], featuresetId: featureset.id}} />
+                <Plot featuresetId={featureset.id} />
               </td>
             </tr>);
 

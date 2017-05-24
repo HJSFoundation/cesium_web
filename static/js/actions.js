@@ -52,6 +52,7 @@ export const RECEIVE_USER_PROFILE = 'cesium/FETCH_USER_PROFILE';
 import { showNotification, reduceNotifications } from 'baselayer/components/Notifications';
 export const GENERATE_PLOT = 'cesium/GENERATE_PLOT';
 export const ADD_TAG_MULTISELECT = 'cesium/ADD_TAG_MULTISELECT';
+export const RECEIVE_PLOT = 'cesium/RECEIVE_PLOT';
 import promiseAction from './action_tools';
 import { objectType } from './utils';
 
@@ -64,7 +65,7 @@ String.prototype.format = function (...args) {
 };
 
 
-// Receive list of projects
+// Receive list of
 function receiveProjects(projects) {
   return {
     type: RECEIVE_PROJECTS,
@@ -135,6 +136,8 @@ export function addProject(form) {
 
 // Update an existing project
 export function updateProject(form) {
+  console.log("In updateProject Action");
+  console.log(form);
   return dispatch =>
     promiseAction(
       dispatch,
@@ -729,7 +732,9 @@ export function generatePlot(form) {
       GENERATE_PLOT,
 
       fetch('/plot_features',
-            { method: 'POST',
+            {
+             credentials: 'same-origin',
+             method: 'POST',
              body: JSON.stringify(form),
              headers: new Headers({
                'Content-Type': 'application/json'
@@ -738,18 +743,20 @@ export function generatePlot(form) {
       ).then((json) => {
         if (json.status == 'success') {
           console.log("Got response from server with plot data.")
+          console.log(json.data);
+          dispatch(receivePlot(json.data));
+          dispatch(showNotification('Plotting has begun.'));
         } else {
           return Promise.reject({ _error: json.message });
         }
         return json;
-      })
+      }).catch(ex => console.log('fetchPlot exception:', ex))
     );
 }
 
-export function addTagToList(tag, featuresetId) {
+function receivePlot(plot) {
   return {
-    type: ADD_TAG_MULTISELECT,
-    tag: tag,
-    featuresetId: featuresetId
+    type: RECEIVE_PLOT,
+    payload: plot
   };
 }

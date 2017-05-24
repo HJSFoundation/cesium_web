@@ -171,23 +171,25 @@ function misc(state={ logoSpinAngle: 0 }, action) {
   }
 }
 
-function plots(state=[], action){
-  console.log("Action " + action);
+function plots(state=[], action) {
+  console.log("In plots reducer");
+  console.log(state);
+  console.log(action);
+
   switch (action.type) {
-    case Action.ADD_TAG_MULTISELECT:
-      console.log("INSIDE THE REDUCER");
-      console.log(state);
-      var state_copy = Object.assign([], state);
-      var plot_idx = state_copy.findIndex(plot => (plot.featuresetId === action.featuresetId));
-      if (plot_idx >= 0) {
-        state_copy[plot_idx]['features'] = action.tag;
-        return state_copy;
+    case Action.RECEIVE_PLOT: {
+      var plot = state.filter(plot => (plot.featuresetId === action.payload.featuresetId))[0];
+      var plotIdx = state.indexOf(plot);
+      if (plotIdx == -1) {
+        return state.concat(action.payload);
       } else {
-        return [ ...state, {featuresetId: action.featuresetId, features: [action.tag]} ];
-      }
-   default:
-     return state;
-  };
+        state[plotIdx] = action.payload;
+        return state;
+      };
+    }
+    default:
+      return state;
+  }
 }
 
 
@@ -195,6 +197,7 @@ const rootReducer = combineReducers({
   projects,
   datasets,
   featuresets,
+  plots,
   features,
   models,
   predictions,

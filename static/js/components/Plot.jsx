@@ -36,119 +36,95 @@ function bokeh_render_plot(node, docs_json, render_items) {
 }
 
 
-class PlotForm extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-  }
+let PlotForm = (props) => {
+  const { fields: { tags },
+          error, resetForm, submitting, handleSubmit, featuresOptions, generatePlot, featuresetId} = props;
 
-  handleChange(value) {
-    this.props.handleSelectChange(value, this.props.featuresetId);
-  }
-
-  render() {
-    console.log(this.props.fields.featuresToPlot);
-    return (
-      <div>
-        <Form onSubmit={this.props.generatePlot} error={this.props.error}>
-          <b>Select Features to Plot</b><br />
-              <Select multi simpleValue joinValues value={this.props.featuresToPlot} placeholder="Select features to plot" options={this.props.featuresOptions} onChange={this.handleChange} style={{zIndex: 10}} />
-              <SubmitButton
-                label="Plot Selected Features"
-                submiting={this.props.submitting}
-              />
-        </Form>
-      </div>
-    );
-  }
+  return (
+    <div>
+      <Form onSubmit={handleSubmit(generatePlot)} error={error}>
+          <Select
+            multi
+            joinValues
+            simpleValue
+            value={tags.value}
+            onChange={tags.onChange}
+            placeholder="Select features to plot"
+            options={featuresOptions}
+            style={{zIndex: 10}}
+            {...tags}
+            onBlur={() => tags.onBlur(tags.value)}
+          />
+          <SubmitButton
+            label="Plot Selected Features"
+            submiting={submitting}
+          />
+      </Form>
+    </div>
+  );
 };
 
 PlotForm = reduxForm({
-  form: 'plot',
-  fields: ['featuresToPlot']
+  form: 'features2plot',
+  fields: ['tags', 'featuresetId'],
 }, null)(PlotForm);
 
-const mapStateToProps = (state, ownProps) => {
+const pfMapStateToProps = (state, ownProps) => {
   console.log("In map state to props")
-  var plot = state.plots.filter(plot => (plot.featuresetId === ownProps.featuresetId))[0];
-  var featureset = state.featuresets.filter(fs => (fs.id === ownProps.featuresetId))[0];
+  var featureset = state.featuresets.filter(fs => (fs.id === ownProps.initialValues.featuresetId))[0];
   var featuresOptions = featureset.features_list.map((feature_name, idx) => {return {value:feature_name, label:feature_name}; });
-  if (typeof plot === 'undefined') {
-    console.log("featuresToPlot: []");
-    return {
-      featuresToPlot: [],
-      featuresOptions: featuresOptions
-    }
-  } else {
-    console.log("featuresToPlot: ");
-    console.log(plot.features)
-    return {
-      featuresToPlot: plot.features,
-      featuresOptions: featuresOptions
-      }
+
+  var plot = state.plots.filter(plot => (plot.featuresetId === ownProps.initialValues.featuresetId))[0];
+  var tags = [];
+  if (plot != null) {
+    tags = plot.tags
+  }
+
+  return {
+    tags: tags,
+    featuresOptions: featuresOptions
   }
 };
 
 const pfMapDispatchToProps = dispatch => (
   {
-    generatePlot: form => dispatch(Action.generatePlot(form)),
-    handleSelectChange: (value, featuresetId) => dispatch(Action.addTagToList(value, featuresetId))
+    generatePlot: form => dispatch(Action.generatePlot(form))
   }
 );
 
-PlotForm = connect(mapStateToProps, pfMapDispatchToProps)(PlotForm);
+PlotForm = connect(pfMapStateToProps, pfMapDispatchToProps)(PlotForm);
 
 
 class Plot extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      plotData: null
-    };
   }
 
-  componentDidMount() {
-    fetch(this.props.url, {
-      credentials: 'same-origin'
-    })
-      .then(response => response.json())
-      .then((json) => {
-        if (json.status == 'success') {
-          this.setState({ plotData: json.data });
-        } else {
-          console.log('dispatching error notification', json.message);
-          this.props.dispatch(
-            showNotification(json.message, 'error')
-          );
-        }
-      });
+  componentDidUpdate() {
+    const { plot } = this.props;
+    var docs_json = JSON.parse(plot.docs_json);
+    var render_items = JSON.parse(plot.render_items);
+    var node = document.getElementById('plot' + this.props.featuresetId.toString());
+    if (node && docs_json && render_items) {
+      node.innerHTML = "";
+      bokeh_render_plot(node, docs_json, render_items);
+    }
   }
 
   render() {
-    const { plotData } = this.state;
-    if (!plotData) {
-      return <b>Please wait while we load your plotting data...</b>;
-    }
-    var docs_json = JSON.parse(plotData.docs_json);
-    var render_items = JSON.parse(plotData.render_items);
-
-    return (
-      plotData &&
-        <div
-          ref={
-            (node) => {
-              node && bokeh_render_plot(node, docs_json, render_items)
-              }
-            }
-        />
-    );
+    return (<div id={`plot${this.props.featuresetId}`}/>);
   }
 }
-Plot.propTypes = {
-  url: React.PropTypes.string.isRequired,
-  dispatch: React.PropTypes.func.isRequired
+// TODO add Plot.propTypes
+
+const plotMapStateToProps = (state, ownProps) => {
+  console.log("In plotMapStateToProps");
+  var plot = state.plots.filter(plot => (plot.featuresetId === ownProps.featuresetId))[0];
+  return {
+    plot: plot
+  };
 };
 
-Plot = connect()(Plot);
+Plot = connect(plotMapStateToProps, null)(Plot);
 
 export {Plot, PlotForm};
