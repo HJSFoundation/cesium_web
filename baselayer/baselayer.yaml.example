@@ -6,27 +6,14 @@ app:
                           # using:
                           #
                           # base64.b64encode(os.urandom(50)).decode('ascii')
-    factory: cesium_app.app_server.make_app
+    factory: baselayer.example_app.make_app
     port: 65000
 
-paths:
-    # Note below that defined variables can be reused in subsequent
-    # definitions.
-
-    data_path: './data'
-    models_folder: './data/models'
-    features_folder: './data/extracted_features'
-    predictions_folder: './data/predictions'
-    ts_data_folder: './data/ts_data'
-
-    upload_folder: './data/uploads'
-    custom_feature_script_folder: './data/uploads/custom_feature_scripts'
-
 database:
-    database: cesium
+    database: app_name
     host:
     port: 5432
-    user: cesium
+    user: app_name
     password:
 
 server:
