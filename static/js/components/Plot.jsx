@@ -5,7 +5,7 @@ import "../../../node_modules/bokehjs/build/js/bokeh.js";
 import "../../../node_modules/bokehjs/build/css/bokeh.css";
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
-import * as Action from './actions';
+import * as Action from '../actions';
 import { reduxForm } from 'redux-form';
 import { Form, SubmitButton} from './Form';
 
@@ -39,28 +39,45 @@ function bokeh_render_plot(node, docs_json, render_items) {
 let PlotForm = (props) => {
   const { fields: { tags },
           error, resetForm, submitting, handleSubmit, featuresOptions, generatePlot, featuresetId} = props;
+  console.log("In PlotForm");
+  console.log(tags);
+
+  let options = featuresOptions;
+
+  // Limit number of selections to 4
+  if ((typeof tags.value === 'string' || tags.value instanceof String) ) {
+    let selected = tags.value.split(',');
+    if (selected.length >= 4) {
+      options = featuresOptions.filter(option => (selected.indexOf(option.value) > -1));
+    }
+  }
 
   return (
-    <div>
-      <Form onSubmit={handleSubmit(generatePlot)} error={error}>
+      <form className="form-inline" onSubmit={handleSubmit(generatePlot)} error={error}>
+        <div className="form-group" style={{width:'70%'}}>
           <Select
             multi
             joinValues
             simpleValue
             value={tags.value}
             onChange={tags.onChange}
-            placeholder="Select features to plot"
-            options={featuresOptions}
+            placeholder="Select up to four features for a scatter plot"
+            options={options}
             style={{zIndex: 10}}
             {...tags}
             onBlur={() => tags.onBlur(tags.value)}
           />
-          <SubmitButton
-            label="Plot Selected Features"
+        </div>
+        <div className="form-group" style={{width:'30%'}}>
+          <button
+            type="submit"
+            className="btn btn-primary"
             submiting={submitting}
-          />
-      </Form>
-    </div>
+          >
+          Plot Selected Features
+          </button>
+        </div>
+      </form>
   );
 };
 
@@ -69,8 +86,11 @@ PlotForm = reduxForm({
   fields: ['tags', 'featuresetId'],
 }, null)(PlotForm);
 
+// TODO Make variable featuresetId
 const pfMapStateToProps = (state, ownProps) => {
   console.log("In map state to props")
+  console.log(state);
+
   var featureset = state.featuresets.filter(fs => (fs.id === ownProps.initialValues.featuresetId))[0];
   var featuresOptions = featureset.features_list.map((feature_name, idx) => {return {value:feature_name, label:feature_name}; });
 

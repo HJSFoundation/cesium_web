@@ -12,7 +12,7 @@ class PlotFeaturesHandler(BaseHandler):
         print(data)
 
         featureset_id = data['featuresetId']
-        fset = Featureset.get_if_owned(featureset_id, self.get_username())
+        fset = Featureset.get_if_owned(featureset_id, self.current_user)
 
         if data['tags']:
             features_to_plot = data['tags'].split(',')
