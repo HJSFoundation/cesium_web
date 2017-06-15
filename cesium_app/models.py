@@ -221,20 +221,3 @@ def remove_file(mapper, connection, target):
 sa.event.listens_for(Featureset, 'after_delete')(remove_file)
 sa.event.listens_for(Model, 'after_delete')(remove_file)
 sa.event.listens_for(Prediction, 'after_delete')(remove_file)
-
-
-class User(Base):
-    username = sa.Column(sa.String(), nullable=False, unique=True)
-    email = sa.Column(sa.String(), nullable=False, unique=True)
-    projects = relationship('Project', secondary=user_projects,
-                            back_populates='users', cascade='all')
-
-    @classmethod
-    def user_model(cls):
-        return User
-
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
