@@ -68,8 +68,7 @@ if __name__ == '__main__':
     from cesium_app.models import init_db
     from cesium_app.app_server import load_config
     basedir = pathlib.Path(os.path.dirname(__file__))/'..'
-    cfg = load_config([basedir/'config.yaml.example',
-                       basedir/TEST_CONFIG])
+    cfg = load_config([basedir/'config.yaml.example', basedir/TEST_CONFIG])
     init_db(**cfg['database'])
 
     clear_tables()
@@ -111,7 +110,7 @@ if __name__ == '__main__':
 
         print('[test_frontend] Launching pytest on {}...'.format(test_spec))
 
-        status = subprocess.run(f'python -m pytest -v {test_spec} {RAND_ARGS}',
+        status = subprocess.run(f'python -m pytest -sv {test_spec} {RAND_ARGS}',
                                 shell=True, check=True)
     except:
         raise

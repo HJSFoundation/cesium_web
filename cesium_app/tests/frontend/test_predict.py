@@ -233,7 +233,11 @@ def test_predict_specific_ts_name(driver, project, dataset, featureset, model):
 
     for i in range(10):
         pred_info = driver.request('GET', '{}/predictions/{}'.format(
-            driver.server_url, response['data']['id'])).json()
+            driver.server_url, response['data']['id']))
+        print("RESPONSE INFO:")
+        print(pred_info.encoding, pred_info.reason, pred_info.content)
+        pred_info = pred_info.json()
+        print(pred_info)
         if pred_info['status'] == 'success' and pred_info['data']['finished']:
             assert isinstance(pred_info['data']['results']['217801']
                               ['features']['total_time'],
